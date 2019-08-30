@@ -27,7 +27,7 @@ class Coordinator(Script):
     def install(self, env):
         from params import java_home
         Execute('wget --no-check-certificate {0}  -O /tmp/{1}'.format(PRESTO_RPM_URL, PRESTO_RPM_NAME))
-        Execute('export JAVA8_HOME={0} && rpm -i /tmp/{1}'.format(java_home, PRESTO_RPM_NAME))
+        Execute('export JAVA8_HOME={0} && rpm -i /tmp/{1}'.format(java_home, PRESTO_RPM_NAME), ignore_failures=True)
         self.configure(env)
 
     def stop(self, env):
@@ -41,7 +41,8 @@ class Coordinator(Script):
         Execute('{0} start'.format(daemon_control_script))
         if 'presto_worker_hosts' in host_info.keys():
             all_hosts = host_info['presto_worker_hosts'] + \
-                        host_info['presto_coordinator_hosts']
+                host_info['presto_coordinator_hosts']
+            all_hosts = list(set(all_hosts))
         else:
             all_hosts = host_info['presto_coordinator_hosts']
         smoketest_presto(PrestoClient('localhost', 'root', config_properties['http-server.http.port']), all_hosts)
